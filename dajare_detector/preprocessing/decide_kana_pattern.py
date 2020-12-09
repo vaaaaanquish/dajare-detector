@@ -26,25 +26,30 @@ class DecideKanaPattern(DajareTask):
         split_df = self.load_data_frame('split').reset_index(drop=True)
         kana_df = self.load_data_frame('kana').reset_index(drop=True)
         df = pd.merge(split_df, kana_df, on='_id')
-        df['decide_kana_flag_list'] = df[[
+        df['decide_kana_word_list'] = df[[
             'splited_pattern', 'normalized_kana_pattern'
-        ]].apply(self._decide_kana_pattern, axis=1)
+        ]].apply(self._get_kana_pattern, axis=1)
+        df['decide_kana_flag_list'] = df['decide_kana_word_list'].apply(
+            self._decide_kana_pattern)
         self.dump(df[['_id', 'decide_kana_flag_list']])
 
-    def _decide_kana_pattern(self, row):
-        flag_list = []
+    def _get_kana_pattern(self, row):
+        kana_list = []
         for kana, splited_kana in zip(row['normalized_kana_pattern'],
                                       row['splited_pattern']):
             if len(splited_kana) == 0:
-                flag_list.append(False)
+                kana_list.append([])
                 continue
             word, count = self._get_top_of_count_word(splited_kana)
             if count > 1 and self._sentence_max_dup_rate(
                     word, kana, splited_kana) <= 0.5:
-                flag_list.append(True)
+                kana_list.append([word, word])
             else:
-                flag_list.append(False)
-        return flag_list
+                kana_list.append([])
+        return kana_list
+
+    def _decide_kana_pattern(self, pattern):
+        return [bool(x) for x in pattern]
 
     def _get_top_of_count_word(self, splited_kana):
         return Counter(splited_kana).most_common()[0]
