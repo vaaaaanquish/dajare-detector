@@ -25,7 +25,8 @@ class TrainCoOccurrenceRoman(DajareTask):
             self.load('train_test_val')['train_features']['_id'])]
         df['word_set'] = df.apply(self._select_word, axis=1)
         df = df[df['word_set'].apply(lambda x: len(x) == 2)]
-        vectorizer = CoOccurrenceVectorizer.fit(df['word_set'].tolist())
+        vectorizer = CoOccurrenceVectorizer()
+        vectorizer.fit(df['word_set'].tolist())
         self.dump(vectorizer)
 
     def _select_word(self, row):
