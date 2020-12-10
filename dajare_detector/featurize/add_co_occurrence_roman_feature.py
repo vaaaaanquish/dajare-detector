@@ -49,5 +49,10 @@ class AddCoOOccurrenceRomanFeature(DajareTask):
         self.dump(data)
 
     def _vectorize(self, row, vectorizer):
-        return row['feature'] + vectorizer.transform(
-            [row['decide_roman_word_list']]).toarray()[0].tolist()
+        return row['feature'] + vectorizer.transform([self._select_word(row)])
+
+    def _select_word(self, row):
+        for word_set in row['decide_roman_word_list']:
+            if len(word_set) > 0:
+                return sorted(word_set)
+        return ['', '']

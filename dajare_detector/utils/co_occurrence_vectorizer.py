@@ -15,9 +15,9 @@ class CoOccurrenceVectorizer:
     def transform(self, target: List[List[str]]) -> List[float]:
         result = []
         for x, y in target:
-            if x in self.words and y in self.words:
+            if x and x in self.words and y in self.words:
                 x = self.words.index(x)
-                y = self.woords.index(y)
+                y = self.words.index(y)
                 result.append(self.matrix[x][y])
             else:
                 result.append(0)
@@ -39,7 +39,7 @@ class CoOccurrenceVectorizer:
             mat[y][x] += 1
         self.matrix = self._calc_ppmi(mat)
 
-    def _calc_ppmi(C, eps=1e-8):
+    def _calc_ppmi(self, C, eps=1e-8):
         M = np.zeros_like(C, dtype=np.float32)
         N = np.sum(C)
         S = np.sum(C, axis=0)
